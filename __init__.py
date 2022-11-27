@@ -141,14 +141,18 @@ class JLCSMTPlugin(pcbnew.ActionPlugin):
 
         fn = Path(board.GetFileName()).with_suffix("")
 
+        all = open("{}_cpl_all.csv".format(fn), "w", newline='')
         bot = open("{}_cpl_bot.csv".format(fn), "w", newline='')
         top = open("{}_cpl_top.csv".format(fn), "w", newline='')
+        allw = csv.writer(all, delimiter=',', quotechar='"',
+                          quoting=csv.QUOTE_ALL)
         botw = csv.writer(bot, delimiter=',', quotechar='"',
                           quoting=csv.QUOTE_ALL)
         topw = csv.writer(top, delimiter=',', quotechar='"',
                           quoting=csv.QUOTE_ALL)
 
         hdr = ["Designator", "Mid X", "Mid Y", "Layer", "Rotation"]
+        allw.writerow(hdr)
         botw.writerow(hdr)
         topw.writerow(hdr)
 
@@ -199,10 +203,13 @@ class JLCSMTPlugin(pcbnew.ActionPlugin):
             y = str(mid_y) + "mm"
 
             if layer == "F.Cu":
+                allw.writerow([ref, x, y, "top", rot])
                 topw.writerow([ref, x, y, "top", rot])
             elif layer == "B.Cu":
+                allw.writerow([ref, x, y, "bottom", rot])
                 botw.writerow([ref, x, y, "bottom", rot])
 
+        all.close()
         bot.close()
         top.close()
         wx.MessageBox("Placement files generated.",
